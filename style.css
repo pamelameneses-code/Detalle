@@ -1,0 +1,110 @@
+/* Fondo general */
+body {
+    background-color: black;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-image:url('Imagenes/foto8.jpg');
+    background-size: cover;
+    background-attachment:fixed;
+}
+  
+.titulo-principal {
+  color:yellow;
+  font-size: 3em;
+  margin-top: 20px;
+  }
+
+.subtitulo {
+    color:aqua;
+    font-size: 2em;
+    margin-top: 10px;
+
+}
+
+.juramento {
+    max-width: 600px;
+    margin: 20px auto;
+    line-height: 1.6;
+    font-size: 1.1em;
+}
+
+
+
+/* --- GALERIA: organiza las tarjetas en filas --- */
+.galeria {
+    display: flex;
+    justify-content: center;
+    gap: 40px;           /* separacion entre tarjetas */
+    flex-wrap: wrap;     /* permite saltar a otra fila */
+    margin-top: 30px;
+}
+
+
+/* --- TARJETAS (marco, sombra, bordes) --- */
+.tarjeta {
+    background-color: #111;     /* gris muy oscuro */
+    padding: 20px;
+    border-radius: 10px;        /* bordes redondeados */
+    width: 260px;
+    box-shadow: 0 0 15px rgba(255,255,255,0.2);
+    transition: transform 0.3s;
+}
+
+.tarjeta:hover {
+    transform: scale(1.05);     /* animacion cuando pasas mouse */
+}
+
+
+/* --- IMAGENES dentro de cada tarjeta --- */
+.tarjeta img {
+    width: 100%;
+    border-radius: 10px;
+}
+
+.seccion-nueva, .contador-dias {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: rgba(17, 17, 17, 0.85); /* Fondo oscuro semitransparente */
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+}
+.lista-amor {
+    list-style-type: none; /* Eliminar viñetas por defecto */
+    padding: 0;
+    text-align: left; /* Alinea los puntos a la izquierda */
+    margin-top: 20px;
+   }
+
+ .lista-amor li {
+    background-color: rgba(50, 50, 50, 0.7); /* Fondo más claro para cada elemento */
+    margin-bottom: 12px;
+    padding: 10px 15px;
+    border-left: 5px solid yellow; /* Una barra amarilla como acento */
+    border-radius: 5px;
+    font-size: 1.1em;
+    line-height: 1.4;
+    }
+
+.contador-dias p {
+font-size: 1.2em;
+}
+
+.numero-dias {
+    font-size: 4em !important; /* ¡Hacer que el número sea muy grande! */
+    color: yellow; /* Destacarlo con el color principal */
+    font-weight: bold;
+    margin: 10px 0;
+    text-shadow: 0 0 10px rgba(255, 255, 0, 0.5); /* Sombra de texto para hacerlo brillar */
+}
+
+.juramento, .galeria, .seccion-nueva, .contador-dias {
+    opacity: 0; /* Lo hace invisible */
+    transition: opacity 1s ease-in-out; /* Define una transición suave de 1 segundo */
+}
+
+/* Esta es la clase que JavaScript activará para MOSTRAR el contenido */
+.mostrar {
+    opacity: 1; /* Lo hace completamente visible */
+}
