@@ -1,94 +1,230 @@
 <!DOCTYPE html>
-<html lang="en">
-<head> 
-    
+<html lang="es">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Para TI . ONE PIECE </title>
+    <title>Nuestro Amor - Inicio</title>
 
-    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: radial-gradient(
+                circle at center,
+                #35102f,
+                #09000d 65%,
+                #020005
+            );
+            color: white;
+            font-family: Georgia, 'Times New Roman', serif;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 16px;
+        }
+
+        /* Estrellas de fondo (igual que la pagina del planeta) */
+        .estrellas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                radial-gradient(white 1px, transparent 1px),
+                radial-gradient(white 1px, transparent 1px),
+                radial-gradient(#ffb8d8 1px, transparent 1px);
+            background-size: 90px 90px, 140px 140px, 190px 190px;
+            background-position: 0 0, 40px 70px, 90px 20px;
+            opacity: .55;
+            z-index: 1;
+        }
+
+        .contenido-home {
+            position: relative;
+            z-index: 5;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 560px;
+        }
+
+        h1 {
+            font-size: clamp(28px, 6vw, 46px);
+            color: #ffd8ea;
+            text-shadow: 0 0 10px #ff75ae, 0 0 25px #ff3d91;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+        }
+
+        .subtitulo {
+            font-size: 15px;
+            color: #f5b8d3;
+            font-style: italic;
+            margin-bottom: 40px;
+        }
+
+        /* Fila de las dos fotos con el corazon en medio */
+        .fotos-fila {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            margin-bottom: 34px;
+            flex-wrap: wrap;
+        }
+
+        .persona {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .foto-marco {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 3px solid #ff75ae;
+            box-shadow: 0 0 25px rgba(255, 61, 145, 0.65), inset 0 0 15px rgba(0,0,0,0.6);
+            overflow: hidden;
+            background: rgba(30, 10, 35, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .foto-marco img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Icono que se ve si todavia no pusiste tu foto */
+        .foto-marco .placeholder-icon {
+            font-size: 46px;
+            color: rgba(255, 216, 234, 0.5);
+        }
+
+        .persona .nombre {
+            font-weight: bold;
+            font-size: 16px;
+            color: #ffd8ea;
+            text-shadow: 0 0 8px #ff3d91;
+        }
+
+        .corazon-central {
+            font-size: 34px;
+            color: #ff3d91;
+            filter: drop-shadow(0 0 10px #ff2a85);
+            animation: latido 1.3s infinite;
+            align-self: center;
+        }
+
+        @keyframes latido {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .frase {
+            font-size: 15px;
+            color: #f0c6da;
+            font-style: italic;
+            line-height: 1.6;
+            margin-bottom: 36px;
+            padding: 0 10px;
+        }
+
+        /* Boton Entrar, mismo estilo neon que los botones de la otra pagina */
+        .btn-entrar {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(30, 10, 35, 0.85);
+            border: 1.5px solid rgba(255, 114, 182, 0.8);
+            color: #ffd8ea;
+            padding: 14px 34px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            font-family: Georgia, 'Times New Roman', serif;
+            letter-spacing: 1px;
+            cursor: pointer;
+            text-decoration: none;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.45);
+            transition: all 0.3s;
+        }
+
+        .btn-entrar:hover {
+            background: rgba(236, 72, 153, 0.9);
+            color: #fff;
+            transform: scale(1.06);
+            box-shadow: 0 0 30px rgba(255, 61, 145, 0.7);
+        }
+
+        @media (max-width: 480px) {
+            .foto-marco { width: 110px; height: 110px; }
+            .corazon-central { font-size: 26px; }
+        }
+    </style>
 </head>
+<body>
 
-<body >
+    <div class="estrellas"></div>
 
-    <h1 class="titulo-principal"> PARA TI 💛 </h1>
+    <div class="contenido-home">
+        <h1>NUESTRO AMOR</h1>
+        <p class="subtitulo">Un amor que vence la distancia</p>
 
-    <H2 class="subtitulo" >Mi Juramento </H2>
-      
-    <p class="juramento">
-        Así como Zoro le juró a Kuina llegar a ser el mejor, yo te juro a ti algo también: pase lo que pase, siempre lucharé por lo que siento. No importa cuántas tormentas, enemigos o dudas aparezcan en el camino; mi corazón es terco como un pirata y no se rinde fácilmente. Si el mar nos separa, te buscaré. Si el mundo se vuelve oscuro, encenderé una luz. Y si alguna vez dudas de lo que vales, recuerda que para mí… vales más que cualquier tesoro escondido en la última isla del mundo.
-   </p>
-    
-   <div class="galeria">
-    <div class="tarjeta">
-   <h3>Eres mi tesoro</h3> 
-   <img src="Imagenes/foto9.jpg" alt="Eres mi tesoro">
-   </div>
-   
-   <div class="tarjeta">
-   <h3>Si el mundo nos pone pruebas</h3> 
-   <img src="Imagenes/foto7.jpg" alt="Si el mundo nos pone pruebas">
-   </div>
+        <div class="fotos-fila">
+            <div class="persona">
+                <div class="foto-marco">
+                    <!-- Coloca aqui tu foto: guarda una imagen en esta misma carpeta
+                         llamada "foto1.jpg" (o cambia el nombre en el src de abajo). -->
+                    <img src="imagenes/foto1.jpg" alt="Foto 1" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <i class="fa-solid fa-user placeholder-icon" style="display:none;"></i>
+                </div>
+                <span class="nombre">JURGEAN</span>
+            </div>
 
-   <div class="tarjeta">
-   <h3>Mi tripulacion perfecta</h3> 
-   <img src="Imagenes/foto5.jpg" alt="Mi tripulacion perefecta">
-   </div>
-    
-</div>
+            <i class="fa-solid fa-heart corazon-central"></i>
 
-<div class="seccion-nueva">
-    <H2 class="subtitulo"> Las 5 cosas que Amo mas de ti</H2>
-    
-    <ul class="lista-amor">
-          <li> Tu increible sentido del humor que siempre me hace reir incluso en mis peores dias </li>     
-          <li> La dedicacion que le pones a todo lo que te propones "Como un capitan luchando por su sueño" </li>     
-          <li> La forma en que me cuidas y me haces sentir segura con mi anclaen cualquier tormenta</li>       
-          <li> Tu corazon noble y tu bondad con las personas que te rodean </li> 
-          <li> La manera única en que me miras, sabiendo exactamente lo que siento sin que diga una palabra. </li>    
-    </ul>
-</div>
-<div class="contador-dias">
-        <H2 class="subtitulo">🗓️ Nuestra Aventura Juntos 🗓️</H2>
-        <p>Hemos compartido...</p>
-        <p class="numero-dias" id="dias-juntos">59 meses juntos</p>
-        <p>días de viaje, risas y amor incondicional.</p>
+            <div class="persona">
+                <div class="foto-marco">
+                    <!-- Coloca aqui la foto de tu pareja: "foto2.jpg" en la misma carpeta. -->
+                    <img src="imagenes/foto2.jpg" alt="Foto 2" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <i class="fa-solid fa-user placeholder-icon" style="display:none;"></i>
+                </div>
+                <span class="nombre">PAMELA</span>
+            </div>
+        </div>
+
+        <p class="frase">
+             nos separan los kilómetros,<br>
+            pero nada separa lo que sentimos.
+        </p>
+
+        <a href="planeta.html" class="btn-entrar">
+            <i class="fa-solid fa-earth-americas"></i> Entrar
+        </a>
     </div>
- 
-    <script> 
-    // Tu función existente para calcular el tiempo (Ahora calcula meses)
-    const fechaInicio = new Date(2021, 3, 1); 
-
-    function calcularTiempo() {
-        const hoy = new Date();
-        const diferenciaTiempo = hoy.getTime() - fechaInicio.getTime();
-        const diferenciaDias = Math.floor(diferenciaTiempo / (1000 * 60 * 60 * 24));
-        const diferenciaMeses = Math.floor(diferenciaDias / 30.4375); // Cálculo para meses
-        
-        // Actualiza el texto del contador
-        document.getElementById('dias-juntos').textContent = diferenciaMeses + " meses juntos";
-    }
-
-    // ⭐ FUNCIÓN JS: Controla la aparición del contenido (la animación) ⭐
-    function animarAparicion() {
-        // Ejecuta la acción después de 3000 ms (3 segundos)
-        setTimeout(() => {
-            // Añade la clase 'mostrar' a los elementos para que aparezcan suavemente
-            document.querySelector('.juramento').classList.add('mostrar');
-            document.querySelector('.galeria').classList.add('mostrar');
-            document.querySelector('.seccion-nueva').classList.add('mostrar');
-            document.querySelector('.contador-dias').classList.add('mostrar');
-            
-        }, 3000); // <-- Retraso de 3 segundos
-    }
-
-    // Llamamos a las dos funciones al cargar la página:
-    calcularTiempo(); 
-    animarAparicion(); 
-
-    // Mantenemos el intervalo para actualizar el contador diariamente
-    setInterval(calcularTiempo, 86400000);
-    </script>
 
 </body>
 </html>

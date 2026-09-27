@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuestro Amor - Un amor que vence la distancia</title>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Three.js + OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: radial-gradient(
+                circle at center,
+                #35102f,
+                #09000d 65%,
+                #020005
+            );
+            color: white;
+            font-family: Georgia, 'Times New Roman', serif;
+            user-select: none;
+        }
+
+        /* Estrellas de fondo */
+        .estrellas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                radial-gradient(white 1px, transparent 1px),
+                radial-gradient(white 1px, transparent 1px),
+                radial-gradient(#ffb8d8 1px, transparent 1px);
+            background-size: 90px 90px, 140px 140px, 190px 190px;
+            background-position: 0 0, 40px 70px, 90px 20px;
+            opacity: .55;
+            z-index: 1;
+        }
+
+        /* Encabezado */
+        header {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding-top: 20px;
+            pointer-events: none;
+        }
+
+        header h1 {
+            font-size: clamp(28px, 5vw, 50px);
+            color: #ffd8ea;
+            text-shadow: 0 0 10px #ff75ae, 0 0 25px #ff3d91;
+            letter-spacing: 2px;
+        }
+
+        header p {
+            margin-top: 4px;
+            font-size: 16px;
+            color: #f5b8d3;
+            font-style: italic;
+        }
+
+        /* Contenedor del Planeta 3D */
+        main {
+            position: relative;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+        }
+
+        #planeta-container {
+            width: min(92vw, 650px);
+            height: min(80vw, 500px);
+            position: relative;
+            border-radius: 28px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 114, 182, 0.4);
+            box-shadow: 0 0 35px rgba(236, 72, 153, 0.4), inset 0 0 20px rgba(0,0,0,0.8);
+            background: #000;
+        }
+
+        #canvas3d {
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: grab;
+        }
+
+        #canvas3d:active {
+            cursor: grabbing;
+        }
+
+        /* Controles sobre el Mapa 3D */
+        .map-controls-overlay {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            z-index: 20;
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-map-control {
+            background: rgba(30, 10, 35, 0.85);
+            border: 1px solid rgba(255, 114, 182, 0.6);
+            color: #ffd8ea;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-map-control:hover {
+            background: rgba(236, 72, 153, 0.9);
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        /* Etiquetas Neón sobre la Tierra 3D */
+        .neon-label-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            transform: translate(-50%, -100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: opacity 0.2s ease;
+            z-index: 15;
+        }
+
+        .neon-label {
+            background: rgba(15, 2, 20, 0.92);
+            border: 1.5px solid #ff75ae;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 11px;
+            padding: 4px 9px;
+            border-radius: 12px;
+            white-space: nowrap;
+            box-shadow: 0 0 12px #ff3d91;
+            letter-spacing: 1px;
+        }
+
+        .neon-pin {
+            width: 10px;
+            height: 10px;
+            background: #ff2a85;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            margin-top: 3px;
+            box-shadow: 0 0 12px #ff2a85;
+            animation: pulsePin 1.5s infinite;
+        }
+
+        @keyframes pulsePin {
+            0% { transform: scale(0.9); box-shadow: 0 0 5px #ff2a85; }
+            50% { transform: scale(1.3); box-shadow: 0 0 18px #ff2a85; }
+            100% { transform: scale(0.9); box-shadow: 0 0 5px #ff2a85; }
+        }
+
+        /* Caja de Conexión / Ruta */
+        .conexion {
+            margin-top: 18px;
+            position: relative;
+            z-index: 20;
+            min-width: 280px;
+            padding: 14px 28px;
+            border-radius: 18px;
+            text-align: center;
+            background: rgba(80, 5, 55, .85);
+            border: 1px solid rgba(255, 100, 170, .8);
+            box-shadow: 0 0 20px rgba(255, 50, 150, .35);
+            backdrop-filter: blur(8px);
+        }
+
+        .conexion span {
+            display: block;
+            color: #ffacd0;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .conexion strong {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 18px;
+            color: white;
+        }
+
+        .conexion small {
+            display: block;
+            margin-top: 5px;
+            color: #e8b8cc;
+            font-style: italic;
+            font-size: 12px;
+        }
+
+        /* Sobre / Botón Carta */
+        .carta {
+            text-align: center;
+            margin-top: 20px;
+            padding-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+
+        #botonCarta {
+            border: none;
+            background: transparent;
+            font-size: 75px;
+            cursor: pointer;
+            filter: drop-shadow(0 0 15px #ff72aa);
+            animation: flotar 2s ease-in-out infinite;
+            transition: transform .3s;
+            display: inline-block;
+        }
+
+        #botonCarta:hover {
+            transform: scale(1.2) rotate(6deg);
+        }
+
+        .carta p {
+            color: #ffd1e2;
+            font-size: 15px;
+            margin-top: 6px;
+        }
+
+        /* Modal Carta */
+        .ventana {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, .8);
+            backdrop-filter: blur(10px);
+            opacity: 1;
+            transition: opacity 0.4s ease;
+        }
+
+        .oculto {
+            display: none !important;
+        }
+
+        .contenidoCarta {
+            position: relative;
+            width: min(580px, 92vw);
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 35px 28px;
+            border-radius: 25px;
+            text-align: center;
+            color: #642443;
+            background: linear-gradient(135deg, #fff4fa, #ffe1ed);
+            box-shadow: 0 0 60px rgba(255, 80, 160, .65);
+            animation: modalScale 0.4s ease-out;
+        }
+
+        @keyframes modalScale {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .contenidoCarta h2 {
+            font-size: 30px;
+            margin-bottom: 4px;
+            color: #a32359;
+        }
+
+        .contenidoCarta h3 {
+            font-size: 18px;
+            color: #c72f6b;
+            margin-bottom: 18px;
+            font-weight: normal;
+        }
+
+        .contenidoCarta p {
+            font-family: Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 14px;
+            text-align: justify;
+        }
+
+        .corazon {
+            font-size: 46px;
+            display: inline-block;
+            margin: 8px 0;
+            animation: latido 1s infinite;
+        }
+
+        .firma {
+            font-weight: bold;
+            color: #a32359;
+            text-align: center !important;
+            font-size: 17px !important;
+        }
+
+        .cerrar {
+            position: absolute;
+            top: 10px;
+            right: 16px;
+            border: none;
+            background: transparent;
+            font-size: 32px;
+            color: #a52b60;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .cerrar:hover {
+            transform: scale(1.2);
+        }
+
+        @keyframes flotar {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        @keyframes latido {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.25); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 28px; }
+            #planeta-container { height: 380px; }
+            .conexion { min-width: auto; width: 90%; padding: 12px; }
+            .conexion strong { font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="estrellas"></div>
+
+    <header>
+        <h1>NUESTRO AMOR</h1>
+        <p>Un amor que vence la distancia</p>
+    </header>
+
+    <main>
+        <!-- Canvas 3D de la Tierra -->
+        <div id="planeta-container">
+            <div class="map-controls-overlay">
+                <button id="btn-enfocar" class="btn-map-control" title="Reenfocar Perú">
+                    <i class="fa-solid fa-earth-americas"></i> Enfocar Perú
+                </button>
+                <button id="btn-musica" class="btn-map-control" title="Música Romántica">
+                    <i id="icono-musica" class="fa-solid fa-music"></i> <span id="texto-musica">Música</span>
+                </button>
+            </div>
+            
+            <canvas id="canvas3d"></canvas>
+
+            <!-- Overlay de Marcadores HTML 2D sobre 3D -->
+            <div id="marker-lima" class="neon-label-container">
+                <div class="neon-label">LIMA 🇵🇪</div>
+                <div class="neon-pin"></div>
+            </div>
+            <div id="marker-ayacucho" class="neon-label-container">
+                <div class="neon-label">AYACUCHO 🇵🇪</div>
+                <div class="neon-pin"></div>
+            </div>
+        </div>
+
+        <!-- Detalles de Conexión -->
+        <div class="conexion">
+            <span>🚀 Ruta Directa de Nuestro Amor</span>
+            <strong>
+                <span>Lima 🇵🇪</span>
+                <i class="fa-solid fa-heart" style="color: #ff3d91; font-size: 13px;"></i>
+                <span>Ayacucho 🇵🇪</span>
+            </strong>
+            <small>Distancia real: ~330 km (Siempre Unidos)</small>
+        </div>
+
+        <!-- Botón de Carta sobre flotante -->
+        <div class="carta">
+            <button id="botonCarta" title="Abrir Carta">💌</button>
+            <p>✦ Toca el sobre para abrir nuestra carta ✦</p>
+        </div>
+    </main>
+
+    <!-- Modal Romántico -->
+    <div id="ventanaCarta" class="ventana oculto">
+        <div class="contenidoCarta">
+            <button id="btnCerrar" class="cerrar">&times;</button>
+            <h2>Para Mi Gran Amor</h2>
+            <h3>De Lima a Ayacucho, sin fronteras...</h3>
+            
+            <p>
+                Sé que a veces la distancia me pone un poco renegona, que me quejo, que me pongo pesada sin querer... pero es porque te extraño de verdad, todos los días, aunque no siempre lo diga bonito.
+            </p>
+            <p>
+                No importa cuántos kilómetros haya <strong>entre nosotros</strong>: cada mensaje tuyo, cada llamada, cada "ya casi nos vemos" hace que la espera valga la pena. Te pienso más de lo que te imaginas.
+            </p>
+            <p>
+                Gracias por aguantarme incluso cuando ando de mal humor por no tenerte cerca. Eso también es amor. Y el mío, aunque a veces venga con reclamos, es real y no se cansa de esperarte.
+            </p>
+            
+            <div class="corazon">💖</div>
+            <p class="firma">¡Te amo con todo mi corazón!</p>
+        </div>
+    </div>
+
+    <!-- Audio de Fondo -->
+    <!-- Coloca tu propio archivo mp3 en la MISMA carpeta que este index.html
+         y llámalo "musica.mp3" (o cambia el nombre aquí abajo por el tuyo). -->
+    <audio id="audioFondo" loop src="musica.mp3"></audio>
+
+    <script>
+        // Coordenadas geográficas de Lima y Ayacucho
+        const LIMA_LAT = -12.046374;
+        const LIMA_LON = -77.042793;
+        const AYACUCHO_LAT = -13.15878;
+        const AYACUCHO_LON = -74.22389;
+
+        const GLOBE_RADIUS = 2.0;
+
+        // Convertir Latitud y Longitud a un vector Vector3 en la esfera 3D
+        function latLongToVector3(lat, lon, radius, altitude = 0) {
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (lon + 180) * (Math.PI / 180);
+
+            const r = radius + altitude;
+            const x = -(r * Math.sin(phi) * Math.cos(theta));
+            const z = (r * Math.sin(phi) * Math.sin(theta));
+            const y = (r * Math.cos(phi));
+
+            return new THREE.Vector3(x, y, z);
+        }
+
+        // Generar mapa procedural realista como fallback en caso de problemas de red/CORS
+        function generateProceduralEarthCanvas() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            // Fondo de Océanos Azul Profundo
+            ctx.fillStyle = '#0f2b48';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Continentes estilizados de respaldo
+            ctx.fillStyle = '#1e5e3a';
+            // América del Sur / Perú approx
+            ctx.beginPath();
+            ctx.ellipse(300, 320, 90, 140, 0.2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // América del Norte
+            ctx.beginPath();
+            ctx.ellipse(250, 160, 110, 80, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // África & Eurasia
+            ctx.beginPath();
+            ctx.ellipse(580, 260, 80, 110, 0, 0, Math.PI * 2);
+            ctx.ellipse(750, 180, 160, 90, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            return canvas;
+        }
+
+        // --- STREAMING_CHUNK:Setting up Three.js Scene, Camera, and Renderer... ---
+        const container = document.getElementById('planeta-container');
+        const canvas3d = document.getElementById('canvas3d');
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(0, 0, 6.2);
+
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas3d, antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // OrbitControls para interacción suave
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.rotateSpeed = 0.6;
+        controls.enableZoom = false; // Mantenemos zoom fijo para mejor UX
+        controls.enablePan = false;
+
+        // Iluminación
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffe8f5, 0.8);
+        dirLight.position.set(5, 3, 5);
+        scene.add(dirLight);
+
+        // --- STREAMING_CHUNK:Creating 3D Earth sphere and loading textures... ---
+        const sphereGeo = new THREE.SphereGeometry(GLOBE_RADIUS, 64, 64);
+        
+        // Textura realista de la Tierra (fuente oficial de three.js, muy estable)
+        const textureLoader = new THREE.TextureLoader();
+        textureLoader.crossOrigin = 'anonymous';
+
+        const EARTH_MAP_URL = 'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg';
+        const EARTH_SPECULAR_URL = 'https://threejs.org/examples/textures/planets/earth_specular_2048.jpg';
+        const EARTH_NORMAL_URL = 'https://threejs.org/examples/textures/planets/earth_normal_2048.jpg';
+
+        const earthMaterial = new THREE.MeshPhongMaterial({
+            shininess: 6,
+            specular: new THREE.Color(0x333333),
+            bumpScale: 0.04
+        });
+
+        const earthMesh = new THREE.Mesh(sphereGeo, earthMaterial);
+        scene.add(earthMesh);
+
+        function useFallbackTexture() {
+            const fallbackCanvas = generateProceduralEarthCanvas();
+            earthMaterial.map = new THREE.CanvasTexture(fallbackCanvas);
+            earthMaterial.needsUpdate = true;
+        }
+
+        // Textura principal (color realista de la Tierra)
+        textureLoader.load(
+            EARTH_MAP_URL,
+            (texture) => {
+                earthMaterial.map = texture;
+                earthMaterial.needsUpdate = true;
+            },
+            undefined,
+            () => {
+                // Si falla la textura real, usamos el mapa procedural de respaldo
+                useFallbackTexture();
+            }
+        );
+
+        // Mapa de relieve (bump) - montañas, cordilleras
+        textureLoader.load(
+            EARTH_NORMAL_URL,
+            (texture) => {
+                earthMaterial.bumpMap = texture;
+                earthMaterial.needsUpdate = true;
+            },
+            undefined,
+            () => {} // si falla, no pasa nada grave, se queda liso
+        );
+
+        // Mapa especular - brillo realista en los océanos
+        textureLoader.load(
+            EARTH_SPECULAR_URL,
+            (texture) => {
+                earthMaterial.specularMap = texture;
+                earthMaterial.needsUpdate = true;
+            },
+            undefined,
+            () => {}
+        );
+
+        // Atmósfera de brillo Neón Magenta alrededor de la Tierra
+        const atmosphereGeo = new THREE.SphereGeometry(GLOBE_RADIUS * 1.05, 64, 64);
+        const atmosphereMat = new THREE.ShaderMaterial({
+            vertexShader: `
+                varying vec3 vNormal;
+                void main() {
+                    vNormal = normalize(normalMatrix * normal);
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vNormal;
+                void main() {
+                    float intensity = pow(0.6 - dot(vNormal, vec3(0, 0, 1.0)), 2.0);
+                    gl_FragColor = vec4(1.0, 0.3, 0.65, 1.0) * intensity;
+                }
+            `,
+            blending: THREE.AdditiveBlending,
+            side: THREE.BackSide,
+            transparent: true
+        });
+        const atmosphereMesh = new THREE.Mesh(atmosphereGeo, atmosphereMat);
+        scene.add(atmosphereMesh);
+
+        // --- STREAMING_CHUNK:Adding 3D Pin Markers & Bezier Connection Curve... ---
+        // Vectores de Lima y Ayacucho
+        const posLima = latLongToVector3(LIMA_LAT, LIMA_LON, GLOBE_RADIUS);
+        const posAyacucho = latLongToVector3(AYACUCHO_LAT, AYACUCHO_LON, GLOBE_RADIUS);
+
+        // Crear Puntos/Marcadores Neón 3D en la Esfera
+        function build3DPin(pos, colorHex) {
+            const group = new THREE.Group();
+            
+            // Esferita brillante
+            const pinGeo = new THREE.SphereGeometry(0.05, 16, 16);
+            const pinMat = new THREE.MeshBasicMaterial({ color: colorHex });
+            const pinMesh = new THREE.Mesh(pinGeo, pinMat);
+            group.add(pinMesh);
+
+            // Anillo exterior
+            const ringGeo = new THREE.RingGeometry(0.065, 0.09, 32);
+            const ringMat = new THREE.MeshBasicMaterial({ color: colorHex, side: THREE.DoubleSide });
+            const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+            ringMesh.lookAt(pos.clone().multiplyScalar(2));
+            group.add(ringMesh);
+
+            group.position.copy(pos);
+            return group;
+        }
+
+        const pinLima3D = build3DPin(posLima, 0x40e0ff);
+        const pinAyacucho3D = build3DPin(posAyacucho, 0xff75ae);
+        earthMesh.add(pinLima3D);
+        earthMesh.add(pinAyacucho3D);
+
+        // Curva Bezier 3D entre Lima y Ayacucho elevándose sobre la esfera
+        // Nota: en la realidad estan a solo ~330km, muy cerca en este globo.
+        // Se exagera un poco la altura del arco para que el camino se note bien.
+        const midPoint = new THREE.Vector3().addVectors(posLima, posAyacucho).multiplyScalar(0.5);
+        const distance = posLima.distanceTo(posAyacucho);
+
+        // Elevar el punto medio para dar efecto de arco volador (camino visible)
+        midPoint.setLength(GLOBE_RADIUS + Math.max(distance * 1.8, 0.35));
+
+        const curve = new THREE.QuadraticBezierCurve3(posLima, midPoint, posAyacucho);
+        const curvePoints = curve.getPoints(80);
+        const curveGeo = new THREE.BufferGeometry().setFromPoints(curvePoints);
+
+        // Camino grueso y brillante (tubo) en vez de una linea delgada,
+        // para que se note bien el "caminito" entre las dos ciudades.
+        const tubeGeo = new THREE.TubeGeometry(curve, 100, 0.012, 8, false);
+        const tubeMat = new THREE.MeshBasicMaterial({
+            color: 0xff2a85,
+            transparent: true,
+            opacity: 0.9
+        });
+        const routeTube = new THREE.Mesh(tubeGeo, tubeMat);
+        earthMesh.add(routeTube);
+
+        // Puntitos de luz viajando por el camino, como si el amor recorriera la ruta
+        const NUM_PARTICLES = 6;
+        const routeParticles = [];
+        for (let i = 0; i < NUM_PARTICLES; i++) {
+            const pGeo = new THREE.SphereGeometry(0.028, 12, 12);
+            const pMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95 });
+            const pMesh = new THREE.Mesh(pGeo, pMat);
+            earthMesh.add(pMesh);
+            routeParticles.push({
+                mesh: pMesh,
+                offset: i / NUM_PARTICLES
+            });
+        }
+
+        // Rotar inicialmente el planeta para enfocar Perú de frente
+        function reenfocarPeru(animate = true) {
+            // Longitud de Perú está aprox en -75 grados
+            const targetRotationY = (LIMA_LON + 90) * (Math.PI / 180);
+            const targetRotationX = (-LIMA_LAT) * (Math.PI / 180) * 0.5;
+
+            if (!animate) {
+                earthMesh.rotation.y = targetRotationY;
+                earthMesh.rotation.x = targetRotationX;
+            } else {
+                const startY = earthMesh.rotation.y;
+                const startX = earthMesh.rotation.x;
+                const duration = 1500;
+                const startTime = performance.now();
+
+                function animateStep(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const ease = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+
+                    earthMesh.rotation.y = startY + (targetRotationY - startY) * ease;
+                    earthMesh.rotation.x = startX + (targetRotationX - startX) * ease;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animateStep);
+                    }
+                }
+                requestAnimationFrame(animateStep);
+            }
+        }
+
+        // Aplicar enfoque inicial sin animación para carga inmediata centrada
+        reenfocarPeru(false);
+
+        // --- STREAMING_CHUNK:Updating HTML label overlay projection from 3D to 2D screen coordinates... ---
+        const markerLimaEl = document.getElementById('marker-lima');
+        const markerAyacuchoEl = document.getElementById('marker-ayacucho');
+
+        // Lima y Ayacucho están muy cerca (~330km) y sus etiquetas quedaban
+        // encimadas en pantalla. Se aplica un pequeño desplazamiento visual
+        // fijo en pixeles para que ambas se lean sin superponerse.
+        function updateOverlayLabel(element, posVector3, pixelOffsetX = 0, pixelOffsetY = 0) {
+            // Convertir coordenadas del marcador dentro del mesh a coordenadas del mundo
+            const worldPos = posVector3.clone();
+            earthMesh.localToWorld(worldPos);
+
+            // Verificar si el punto está en la cara frontal o posterior de la Tierra
+            const cameraToPoint = worldPos.clone().sub(camera.position).normalize();
+            const surfaceNormal = worldPos.clone().normalize();
+            
+            const dot = cameraToPoint.dot(surfaceNormal);
+
+            // Si dot es >= 0, está mirando hacia atrás/oculto
+            if (dot >= 0.1) {
+                element.style.opacity = '0';
+                element.style.pointerEvents = 'none';
+                return;
+            }
+
+            // Proyectar a coordenadas de pantalla (-1 a 1)
+            const projected = worldPos.clone().project(camera);
+
+            const x = (projected.x * 0.5 + 0.5) * container.clientWidth + pixelOffsetX;
+            const y = (-projected.y * 0.5 + 0.5) * container.clientHeight + pixelOffsetY;
+
+            element.style.transform = `translate(-50%, -100%) translate(${x}px, ${y}px)`;
+            element.style.opacity = '1';
+        }
+
+        // Rotación automática suave cuando no se está interactuando
+        let isUserInteracting = false;
+        container.addEventListener('pointerdown', () => { isUserInteracting = true; });
+        window.addEventListener('pointerup', () => { isUserInteracting = false; });
+
+        // --- STREAMING_CHUNK:Animation Loop & Event Listeners... ---
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Rotación lenta pasiva si no hay arrastre
+            if (!isUserInteracting) {
+                earthMesh.rotation.y += 0.0012;
+            }
+
+            controls.update();
+
+            // Animar los puntitos de luz recorriendo el camino Lima-Ayacucho
+            const t = clock.getElapsedTime();
+            routeParticles.forEach((p) => {
+                let progress = ((t * 0.15) + p.offset) % 1;
+                const point = curve.getPoint(progress);
+                p.mesh.position.copy(point);
+            });
+
+            // Actualizar posición de las etiquetas HTML (con leve separación para que no se tapen)
+            updateOverlayLabel(markerLimaEl, posLima, -55, -8);
+            updateOverlayLabel(markerAyacuchoEl, posAyacucho, 55, 8);
+
+            renderer.render(scene, camera);
+        }
+
+        // Iniciar bucle de animación
+        animate();
+
+        // Manejo de cambio de tamaño de ventana
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        // Botón "Enfocar Perú"
+        document.getElementById('btn-enfocar').addEventListener('click', () => {
+            reenfocarPeru(true);
+        });
+
+        // --- STREAMING_CHUNK:Handling audio playback and romantic popup modal... ---
+        const audio = document.getElementById('audioFondo');
+        const btnMusica = document.getElementById('btn-musica');
+        const iconoMusica = document.getElementById('icono-musica');
+        const textoMusica = document.getElementById('texto-musica');
+        let reproduciendo = false;
+
+        function toggleMusica() {
+            if (reproduciendo) {
+                audio.pause();
+                iconoMusica.className = "fa-solid fa-music";
+                textoMusica.innerText = "Música";
+            } else {
+                audio.play().then(() => {
+                    iconoMusica.className = "fa-solid fa-compact-disc fa-spin";
+                    textoMusica.innerText = "Sonando";
+                }).catch(err => console.log("Permiso de reproducción requerido:", err));
+            }
+            reproduciendo = !reproduciendo;
+        }
+
+        btnMusica.addEventListener('click', toggleMusica);
+
+        // Modal y Efecto Confeti
+        const botonCarta = document.getElementById('botonCarta');
+        const ventanaCarta = document.getElementById('ventanaCarta');
+        const btnCerrar = document.getElementById('btnCerrar');
+
+        function lanzarConfeti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 55,
+                    spread: 80,
+                    origin: { y: 0.6 },
+                    colors: ['#ff75ae', '#ff3d91', '#ffffff', '#ffd1e2']
+                });
+            }
+        }
+
+        botonCarta.addEventListener('click', () => {
+            ventanaCarta.classList.remove('oculto');
+            lanzarConfeti();
+            if (!reproduciendo) toggleMusica();
+        });
+
+        btnCerrar.addEventListener('click', () => {
+            ventanaCarta.classList.add('oculto');
+        });
+
+        ventanaCarta.addEventListener('click', (e) => {
+            if (e.target === ventanaCarta) {
+                ventanaCarta.classList.add('oculto');
+            }
+        });
+    </script>
+</body>
+</html>
